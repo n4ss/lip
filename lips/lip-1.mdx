@@ -534,14 +534,11 @@ dual_attest_msg_bytes: bytearray = bytearray()
 dual_attest_msg_bytes.extend(lcs_metadata)  # Travel Rule metadata
 dual_attest_msg_bytes.extend(lcs.serialize(bytes.fromhex("793251de1a61e9b4d1a17d13aa015e45"), bytes))  # Raw on-chain address (https://github.com/libra/lip/blob/master/lips/lip-5.md#terminology)
 dual_attest_msg_bytes.extend(lcs.serialize(st.uint64(1000000), st.uint64))  # Amount
-dual_attest_msg_bytes.extend(lcs.serialize(b"@@$$LIBRA_ATTEST$$@@", bytes))  # ASCII-encoded Libra Domain Separator string
+dual_attest_msg_bytes.extend(b"@@$$LIBRA_ATTEST$$@@")  # ASCII-encoded Libra Domain Separator string
 
-dual_attest_msg = libra.TransactionArgument__U8Vector(bytes(dual_attest_msg_bytes))
-dual_attest_msg_lcs = lcs.serialize(dual_attest_msg, libra.TransactionArgument__U8Vector)
-
-// We sign the bytes LCS bytes directly with the compliance private key
+// We sign the bytes directly with the compliance private key
 // `receiver_metadata_signature` will be used as the `metadata_signature` parameter in  encode_peer_to_peer_with_metadata_script()
-receiver_metadata_signature = compliance_private_key.sign(dual_attest_msg_lcs)
+receiver_metadata_signature = compliance_private_key.sign(dual_attest_msg_bytes)
 ```
 
 The `receiver_metadata_signature` will then be placed into the `recipient_signature` field of the PaymentObject in the off-chain API, thus providing it to the sender so that the sender VASP may submit the transaction on-chain.
